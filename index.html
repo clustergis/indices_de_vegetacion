@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Índices de vegetación : Producción automática de índices de vegetación [NDVIs]" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Índices de vegetación</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/clustergis/indices_de_vegetacion">View on GitHub</a>
+
+          <h1 id="project_title">Índices de vegetación</h1>
+          <h2 id="project_tagline">Producción automática de índices de vegetación [NDVIs]</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/clustergis/indices_de_vegetacion/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/clustergis/indices_de_vegetacion/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><a href="#introduccion">Introducción</a></p>
+
+<p><a href="#material">Material utilizado</a></p>
+
+<p><a href="#proceso">Proceso de cálculo</a></p>
+
+<p><a href="#implementacion">Implementación del proceso de cálculo con FME</a></p>
+
+<p><a href="#resultados">Resultados</a></p>
+
+<hr><p> </p>
+
+<h4>
+<a name="introducci%C3%93n" class="anchor" href="#introducci%C3%93n"><span class="octicon octicon-link"></span></a><strong><a name="introduccion">INTRODUCCIÓN</a></strong>
+</h4>
+
+<p>Mediante el uso de imágenes de satélite es posible calcular el conjunto de parámetros numéricos que permiten evaluar y estimar el estado de salud de la vegetación en base a la radiación que las plantas emiten o reflejan.</p>
+
+<p>Un índice de vegetación se define como un parámetro calculado a partir de los valores de reflectancia de las diferentes longitudes de onda. La reflectancia es la fracción de energía reflejada por un objeto posteriormente a la incidencia de la misma en la superficie.</p>
+
+<p>La reflectancia de un cultivo difiere entre el rango del infrarrojo cercano (700-1300 nm) y del rojo (550-700 nm). Las plantas tienen una reflectancia más alta en la región del verde, es por ello que las plantas se ven verdes a nuestros ojos.</p>
+
+<p>La superficie de la planta refleja intensamente la energía en el rango del infrarrojo cercano y se verá afectada por factores medioambientales como la humedad del suelo, la cantidad de nutrientes, la salinidad y la etapa foliar en la que se encuentra la planta (Ma et al., 2001).</p>
+
+<p>El máximo contraste de reflectancia entre la vegetación y el suelo se produce en la región del rojo e infrarrojo cercano.</p>
+
+<p>El comportamiento radiométrico de la vegetación relacionado con la actividad fotosintética y la estructura foliar de las plantas, permite determinar si la vegetación se encuentra sana o si tiene algún grado de estrés. Por ello se utilizan los datos de reflectancia en el cálculo de los índices de vegetación. El índice de vegetación normalizado (NDVI) se calcula a partir de las mediciones de reflectancia en el rango de luz roja e infrarrojo cercano.</p>
+
+<p>Se calcula mediante la siguiente expresión:</p>
+
+<p><a href="#introduccion"><img alt="" src="http://gonzalolopezgarcia.github.io/imagenes/ndvi_formula01.png"></a></p>
+
+<p>Donde IRC, es la reflectancia espectral del infrarrojo cercano (NIR) y R, es la reflectancia espectral del rojo visible.</p>
+
+<p>EL NDVI tiene las ventajas de tener una gran sencillez de cálculo y de facilitar la interpretación directa de los parámetros biofísicos de la vegetación. Los valores de este índice varían entre -1 (nula vegetación) y 1 (vegetación verde vigorosa). Los valores que están por debajo de 0.1 corresponden a los cuerpos de agua y a la tierra desnuda y los valores más altos se relacionan con la actividad fotosintética de las zonas de matorral, el bosque templado y la actividad agrícola.</p>
+
+<p>Por otra parte, las mediciones de NDVI obtenidas a partir de imágenes de satélite están influenciadas por factores que no tienen relación con la vegetación, como las condiciones atmosféricas, la geometría y calibración del satélite, así como por el tipo de suelo y la cobertura de los cultivos.</p>
+
+<p>Existen diferentes índices como modificación al NDVI que presentan una buena correlación con el contenido clorofílico. Estos son el índice de reflectancia en absorción de clorofila transformada (TCARI) y el índice de vegetación ajustado al suelo (OSAVI).</p>
+
+<p>Dado que los mapas de índices se pueden utilizar de forma eficiente en el seguimiento del ciclo de crecimiento de los cultivos, en la evaluación de prácticas agronómicas, como indicador de la degradación forestal y en la detección de cambio del uso del suelo, se ha desarrollado un proceso automático que permite calcular los índices de diferentes imágenes adquiridas por el satélite Landsat para posteriormente distribuir los mapas de índices en un visualizador geográfico como herramienta de apoyo en la toma de decisiones.</p>
+
+<p>Cada vez son más los organismos que ponen a disposición pública imágenes de satélite. La empresa que comercializa el satélite Landsat distribuye de forma libre las imágenes del sensor Landsat 8.</p>
+
+<p>Se abre de esta manera una nueva oportunidad en el uso de herramientas de ayuda en la toma de decisiones a bajo coste.</p>
+
+<p> </p>
+
+<h4>
+<a name="material-utilizado" class="anchor" href="#material-utilizado"><span class="octicon octicon-link"></span></a><strong><a name="material">MATERIAL UTILIZADO</a></strong>
+</h4>
+
+<p><strong>IMÁGENES</strong></p>
+
+<p>Se han utilizado para el cálculo de índices imágenes del satélite Landsat 8. Desde el 30 de mayo de 2013, se encuentran disponibles las escenas satelitales tomadas por el nuevo satélite. Su descarga es posible gracias a la interface programada por el <a href="http://glovis.usgs.gov/">USGS: Global Visualization Viewer</a>.</p>
+
+<p>Las características del nuevo satélite son las siguientes:</p>
+
+<table border="1" cellpadding="0" cellspacing="0"><tbody>
+<tr>
+<td> </td>
+            <td>
+            <p><strong>LANDSAT 8</strong></p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Altitud nominal</p>
+            </td>
+            <td>
+            <p>705 km</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Inclinación</p>
+            </td>
+            <td>
+            <p>98,2º</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Resolución radiométrica</p>
+            </td>
+            <td>
+            <p>12 bits</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Swath</p>
+            </td>
+            <td>
+            <p>180 km</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Tiempo de revisita</p>
+            </td>
+            <td>
+            <p>16 días</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Sensores</p>
+            </td>
+            <td>
+            <p>Pushbroom (OLI y TIRS)</p>
+            </td>
+        </tr>
+</tbody></table><p> </p>
+
+<p>Tiene un total de 11 bandas, 9 para el OLI y 2 para TIRS:</p>
+
+<table border="1" cellpadding="0" cellspacing="0"><tbody>
+<tr>
+<td>
+            <p><strong>Banda espectral (OLI)</strong></p>
+            </td>
+            <td>
+            <p><strong>Longitud de onda</strong></p>
+            </td>
+            <td>
+            <p><strong>Resolución</strong></p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 1 - Coastal / Aerosol</p>
+            </td>
+            <td>
+            <p>0.433 - 0.453 µm</p>
+            </td>
+            <td>
+            <p>30 m</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 2 - Blue</p>
+            </td>
+            <td>
+            <p>0.450 - 0.515 µm</p>
+            </td>
+            <td>
+            <p>30 m</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 3 - Green</p>
+            </td>
+            <td>
+            <p>0.525 - 0.600 µm</p>
+            </td>
+            <td>
+            <p>30 m</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 4 - Red</p>
+            </td>
+            <td>
+            <p>0.630 - 0.680 µm</p>
+            </td>
+            <td>
+            <p>30 m</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 5 - Near Infrared</p>
+            </td>
+            <td>
+            <p>0.845 - 0.885 µm</p>
+            </td>
+            <td>
+            <p>30 m</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 6 - Short Wavelength Infrared</p>
+            </td>
+            <td>
+            <p>1.560 - 1.660 µm</p>
+            </td>
+            <td>
+            <p>30 m</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 7 - Short Wavelength Infrared</p>
+            </td>
+            <td>
+            <p>2.100 - 2.300 µm</p>
+            </td>
+            <td>
+            <p>30 m</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 8 - Panchromatic</p>
+            </td>
+            <td>
+            <p>0.500 - 0.680 µm</p>
+            </td>
+            <td>
+            <p>15 m</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 9 - Cirrus</p>
+            </td>
+            <td>
+            <p>1.360 - 1.390 µm</p>
+            </td>
+            <td>
+            <p>30 m</p>
+            </td>
+        </tr>
+</tbody></table><p> </p>
+
+<table border="1" cellpadding="0" cellspacing="0"><tbody>
+<tr>
+<td>
+            <p><strong>Banda espectral (TIRS)</strong></p>
+            </td>
+            <td>
+            <p><strong>Longitud de onda</strong></p>
+            </td>
+            <td>
+            <p><strong>Resolución</strong></p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 10 - Long Wavelength Infrared</p>
+            </td>
+            <td>
+            <p>10.30 - 11.30 µm</p>
+            </td>
+            <td>
+            <p>100 m</p>
+            </td>
+        </tr>
+<tr>
+<td>
+            <p>Band 11 - Long Wavelength Infrared</p>
+            </td>
+            <td>
+            <p>11.50 - 12.50 µm</p>
+            </td>
+            <td>
+            <p>100 m</p>
+            </td>
+        </tr>
+</tbody></table><p> </p>
+
+<h4>
+<a name="proceso-de-c%C3%81lculo" class="anchor" href="#proceso-de-c%C3%81lculo"><span class="octicon octicon-link"></span></a><strong><a name="proceso">PROCESO DE CÁLCULO</a></strong>
+</h4>
+
+<p>El proceso de cálculo consiste en el cálculo de diferentes índices de vegetación que se podrán utilizar posteriormente como criterio para la clasificación multitemporal de las cubiertas vegetales, ya que éstos reflejan cual es el ritmo de crecimiento y desarrollo fenológico de los cultivos.</p>
+
+<p>Se precisa para ello de un procedimiento automático que permita el cálculo periódico de diferentes índices de vegetación de imágenes de satélite.</p>
+
+<p>Dicho procedimiento consta de tres pasos:</p>
+
+<ol>
+<li>Un primer paso, en el que se implementa el cálculo acimutal solar y la distancia sol-tierra.</li>
+    <li>
+    <p>En un segundo paso se ha implementado el cálculo de la reflectividad en el techo de la atmósfera (TOA) para cada una de las bandas de la imagen.</p>
+    <p>Para ello se lee la imagen y se calcula el parámetro de reflectancia en el techo de la atmosfera a partir de las formulas correspondientes.</p>
+    </li>
+    <li>
+    <p>El tercer y último paso consiste en el cálculo de los diferentes índices de vegetación.</p>
+
+    <p>Los índices son sensibles a la cubierta vegetal, se fundamentan en el comportamiento radiométrico de la vegetación.</p>
+    </li>
+</ol><p>Para ello se implementan las fórmulas correspondientes y se calculan los siguientes índices:</p>
+
+<ul>
+<li>NDVI (Normalized vegetation index)
+    <ul>
+<li>NDVI = (IR-R)/(IR+R)</li>
+        <li>Valores entre [0-1]; -1 nula vegetación, 1 vegetación densa.</li>
+    </ul>
+</li>
+    <li>TCARI (Transformed cholophyll absorption in reflectance index).
+    <ul>
+<li>Donde las características estructurales de la vegetación tienen más influencia en la vegetación.</li>
+        <li>TCARI = 3*[ (R700-R670)-0,2*(R700-R550)*(R700-R670)]</li>
+    </ul>
+</li>
+    <li>OSAVI ( Optimized Soil-adjusted vegetation index)
+    <ul>
+<li>OSAVI = (1+0,16) *(R800-R670) / (R800+R670+0,16)</li>
+    </ul>
+</li>
+</ul><p> </p>
+
+<h4>
+<a name="implemetaci%C3%93n-del-proceso-en-el-software-fme" class="anchor" href="#implemetaci%C3%93n-del-proceso-en-el-software-fme"><span class="octicon octicon-link"></span></a><strong><a name="implementacion">IMPLEMETACIÓN DEL PROCESO EN EL SOFTWARE FME</a></strong>
+</h4>
+
+<p>Se ha empleado el software FME frente a software específico de Teledetección, donde incluso para algunos tipos de imágenes  están implementadas las fórmulas para el cálculo de índices de vegetación debido a que FME presenta las siguientes ventajas:</p>
+
+<ul>
+<li>De forma sencilla se pueden calcular los índices de vegetación para otros tipos de imágenes de satélite (quickbird, landsat, deimos) con solo modificar los valores de los parámetros.</li>
+    <li>Se pueden además automatizar los procesos de cálculo de múltiples imágenes por medio de procesos BAT.</li>
+    <li>La distribución de las imágenes, en diferentes formatos en función de las necesidades de los usuarios (TIFF, JPG, JPEG2000, etc.)</li>
+    <li>Se pueden implementar con más o menos esfuerzo otro tipo de cálculos como solución a aplicaciones en el sector agrícola:
+    <ul>
+<li>Apoyo a la planificación de riegos</li>
+        <li>Control de explotación de acuíferos</li>
+        <li>Seguimiento y evaluación de la sequía</li>
+        <li>Localización y estimación de daños por helada o granizo</li>
+        <li>Generación de informes sobre contenido de nitrógeno, biomasa, índice de área foliar o vegetación y anomalías.</li>
+    </ul>
+</li>
+</ul><p>Los análisis pueden extenderse a otros sectores, como pueden ser el forestal, el medio ambiental, la planificación urbanística, etc.</p>
+
+<p> </p>
+
+<p>1. - SOLUCIÓN PROPUESTA</p>
+
+<p>Los  diferentes software de teledetección incluyen módulos específicos que permiten calcular la reflectancia en el techo de la atmosfera (ToA reflectance) así como los diferentes índices de vegetación para las imágenes de los satélites más comunes como Lansat, MODIS y Quickbird.</p>
+
+<p>Pero puede ocurrir que para nuevos satélites (RapidEye, Landsat 8, etc.) las fórmulas no se hayan implementado. Es por ello que el desarrollo de un proceso automático permita realizar el cálculo para todo el conjunto de imágenes de forma sencilla.</p>
+
+<p>Para la conversión de los datos Landsat 8 a reflectancias, se ha implementado el proceso en dos pasos.</p>
+
+<p>En primer lugar, convertir los Niveles  Digitales (DN) de un pixel a reflectasancia, para ello es necesario multiplicar el DN por el factor de escala radiométrico, de la siguiente manera:</p>
+
+<p>RAD(i)=DN(i)*radiometricScaleFacotr(i)</p>
+
+<p>El valor resultante es el valor de la radiancia en el techo de la atmosfera para un pixel medido en watts por  steradianes por metro cuadrado (W/m<sup>2</sup> srμm).</p>
+
+<p>Y en segundo lugar convertir los valores de radiancia en valores de reflectancia en el techo de la atmosfera no considerando la influencia atmosférica y teniendo en cuenta sólo la distancia solar y su geometría como la radiación solar entrante.</p>
+
+<p>La fórmula para el cálculo de la reflectancia en el techo de la atmósfera sin considerar la influencia atmosférica, es la siguiente:</p>
+
+<p>REF(i) = RAD(i)* </p>
+
+<p><img alt="" src="http://gonzalolopezgarcia.github.io/imagenes/ndvi_formula02.png"></p>
+
+<p>con:</p>
+
+<ul>
+<li>i: número de banda spectral</li>
+    <li>REF: valor de reflectancia</li>
+    <li>RAD: valor de radiancia</li>
+    <li>SunDist: Distancia tierra –sol el día de la adquisición de la imagen en Unidades Astronómicas.</li>
+    <li>EAI: Irradiancia Exo-Atmospherica</li>
+    <li>SolarZentih: Ángulo solar zenital en grados (=90º - elevación solar)</li>
+</ul><p> </p>
+
+<p>Para Landsat 8 los valores de EAI se obtienen de los metadatos.</p>
+
+<p>Finalmente, se implementan las fórmulas correspondientes para el cálculo de los índices de vegetación NDVI, OSAVI and TCARI.</p>
+
+<ul>
+<li>NDVI = (NIR –Red) / (NIR + Red)</li>
+    <li>OSAVI = (NIR -Red) / (NIR + Red + 0.16)</li>
+    <li>TCARI=3[(NIR-Red) – 0,2(NIR-Green)NIR/Red]</li>
+</ul><p> </p>
+
+<p>2. - SOLUCIÓN FME</p>
+
+<p>La solución propuesta consiste en un proyecto (workspace).</p>
+
+<p>Al inicio del proyecto se leen los metadatos para cada una de las imágenes Landsat y se obtienen los parámetros necesarios para el cálculo de los índices de vegetación:</p>
+
+<ul>
+<li>Coeficientes de reflectancia en el techo de la atmósfera (TOA REFLECTANCE COEFFICIENTS - REFLECTANCE_MULT_BAND)</li>
+    <li>Coeficientes de reflectancia en el techo de la atmósfera (REFLECTANCE_ADD_BAND)</li>
+    <li>Elevación Solar</li>
+</ul><p><img alt="Parámetros necesarios para el cálculo " src="http://gonzalolopezgarcia.github.io/imagenes/ndvi_proceso01.png"></p>
+
+<p>Figura 1. Parámetros necesarios para el cálculo (REFLECTANCE_MULT_BAND)</p>
+
+<p> </p>
+
+<p><img alt="" src="http://gonzalolopezgarcia.github.io/imagenes/ndvi_proceso02.png"></p>
+
+<p>Figura 2. Parámetros necesarios para el cálculo (SUN ELEVATION)</p>
+
+<p> </p>
+
+<p>A continuación, se recuperan los valores de los parámetros y se utilizan en el cálculo de la reflectancia en el techo de la atmósfera y en el cálculo de los índices de vegetación.</p>
+
+<p><img alt="" src="http://gonzalolopezgarcia.github.io/imagenes/ndvi_proceso03.png"></p>
+
+<p>Figura 3. Reflectancia en el techo de la atmosfera para la banda del verde</p>
+
+<p> </p>
+
+<p><img alt="" src="http://gonzalolopezgarcia.github.io/imagenes/ndvi_proceso04.png"></p>
+
+<p>Figura 4. Cálculo de NDVI</p>
+
+<p> </p>
+
+<h4>
+<a name="resultados" class="anchor" href="#resultados"><span class="octicon octicon-link"></span></a><strong><a name="resultados">RESULTADOS</a></strong>
+</h4>
+
+<p>Los resultados finalesdel proyecto son las imágenes tiff de indices de vegetación (0: NDVI, 1: OSAVI; 2: TCARI) que se podrán utilizar para múltiples propósitos.</p>
+
+<p> </p>
+
+<p><img alt="" src="http://gonzalolopezgarcia.github.io/imagenes/ndvi_imagen_satelite.png"></p>
+
+<p><a href="#top">Ir a inicio de documento</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Índices de vegetación maintained by <a href="https://github.com/clustergis">clustergis</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
